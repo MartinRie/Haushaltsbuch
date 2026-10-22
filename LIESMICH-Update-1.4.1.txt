@@ -1,0 +1,39 @@
+HAUSHALTSBUCH-UPDATE 1.4.1
+==========================
+
+Kleines Update für eine installierte Version 1.4.x. Es ersetzt nur den
+Programmcode (ca. 100 KB). Deine Buchungen bleiben unverändert. Ein neues
+vollständiges Setup ist nicht nötig.
+
+NEU in 1.4.1
+Unter "Einstellungen" steht ganz unten die Versionsnummer. Daran siehst du,
+ob ein Update angekommen ist.
+
+WINDOWS
+1. Haushaltsbuch schließen.
+2. Haushaltsbuch-Update-1.4.1.exe auf den PC kopieren und doppelklicken.
+   Benutzerkontensteuerung mit "Ja" bestätigen; bei "Der Computer wurde durch
+   Windows geschützt": "Weitere Informationen", "Trotzdem ausführen".
+3. "Weiter", fertig. Die Version unter "Apps" zeigt danach 1.4.1.
+   Ist das Haushaltsbuch noch offen, meldet das Update das und wartet.
+   Im Hintergrund ohne Fenster:  Haushaltsbuch-Update-1.4.1.exe /S
+
+MAC
+1. Haushaltsbuch beenden (Cmd+Q).
+2. Im Terminal:
+   bash ~/Desktop/Haushaltsbuch/Haushaltsbuch-Update-1.4.1-Mac.sh
+   (Liegt die App nicht unter /Applications, den Pfad zur App anhängen.)
+   Das Skript prüft die Datei, tauscht den Programmcode aus und signiert die
+   App neu. Die Befehle codesign/xattr sind damit schon erledigt.
+
+SICHERHEIT
+- Das Update prüft vorher die installierte Version: Es passt nur auf 1.4.x,
+  spielt nichts Älteres über eine neuere Version und bricht ab, wenn keine
+  Installation gefunden wird.
+- Geht beim Austausch etwas schief, bleibt bzw. kommt die alte Version zurück.
+- Prüfsummen: SHA256SUMS-Update-1.4.1.txt
+  Mac:      shasum -a 256 -c SHA256SUMS-Update-1.4.1.txt
+  Windows:  certutil -hashfile Haushaltsbuch-Update-1.4.1.exe SHA256
+
+Wer das Haushaltsbuch neu installiert: erst Haushaltsbuch-Setup-1.4.0.exe
+(bzw. die Mac-App 1.4.0), dann dieses Update.
