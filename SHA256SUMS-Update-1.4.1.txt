@@ -1,2 +1,0 @@
-9bd53548f77aa9203841116a86ec6efe4cefa1e551c294dce27737cb3253e321  Haushaltsbuch-Update-1.4.1.exe
-fca5676bac343dd63a3141f672f4ed24fd3ea7a6031a87e465009b670d3bf30b  Haushaltsbuch-Update-1.4.1-Mac.sh

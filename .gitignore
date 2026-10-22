@@ -1,0 +1,11 @@
+node_modules/
+release/
+dist/
+out/
+.DS_Store
+
+# alte Lieferdateien im Arbeitsordner (gehören nicht ins Repo)
+/Haushaltsbuch-*.zip
+/Haushaltsbuch-Update-*
+/LIESMICH-Update-*.txt
+/SHA256SUMS-Update-*.txt

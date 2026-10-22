@@ -1,101 +1,87 @@
 # Übergabeprotokoll Haushaltsbuch
 
-Stand: 21.10.2026 · Version 1.4.1 (Grundinstallation 1.4.0 + kleines Update) · Auftraggeber: Martin Riedel
+Stand: 22.10.2026 · Version 1.4.2 · Auftraggeber: Martin Riedel
+Repository (geplant, öffentlich): `https://github.com/MartinRie/Haushaltsbuch`
 
 ## 1. Was ist das?
-Schlichtes Haushaltsbuch für Windows 10/11 (64 Bit) und Mac (Apple Silicon). Electron-App mit reinem HTML/CSS/JavaScript, ohne Framework. Alle Daten bleiben lokal auf dem Rechner.
+Schlichtes Haushaltsbuch für Windows 10/11 (64 Bit), Mac (Apple Silicon) und Linux (x86_64, AppImage).
+Electron-App mit reinem HTML/CSS/JavaScript, ohne Framework. Alle Daten bleiben lokal auf dem Rechner.
 
-## 2. Lieferumfang (Ordner Desktop/Haushaltsbuch)
-| Datei | Zweck |
-|---|---|
-| Haushaltsbuch-Setup-1.4.0.exe.part0–2 | Windows-Installer, in Teilen (Upload-Limit 30 MB) |
-| Haushaltsbuch-Mac-1.4.0.zip.part0–3 | Mac-App, in Teilen |
-| SHA256SUMS-1.4.0.txt | Prüfsummen der zusammengesetzten Dateien |
-| LIESMICH.txt | Installationsanleitung, Neuerungen |
-| Haushaltsbuch-Quellcode.zip | App-Quellcode mit Installer-Skript |
-| Haushaltsbuch-Update-1.4.1.exe | Kleines Windows-Update (100 KB) für eine installierte 1.4.x |
-| Haushaltsbuch-Update-1.4.1-Mac.sh | Kleines Mac-Update (127 KB) als Terminal-Skript |
-| SHA256SUMS-Update-1.4.1.txt, LIESMICH-Update-1.4.1.txt | Prüfsummen und Anleitung zum Update |
-| Haushaltsbuch-Repo.zip | Fertiges Git-Repo (Quellcode, Tests, README), bereit für GitHub |
-| UEBERGABEPROTOKOLL.md | Dieses Dokument |
+## 2. Lieferumfang (Ordner Downloads/Haushaltsbuch = Git-Repo MartinRie/Haushaltsbuch)
+Alle Projektdateien liegen direkt im Repo-Ordner: Quellcode, Tests (`tests/`), Bauskripte (`tools/`),
+Installer-Skripte (`installer/`), Icons (`build/`, `assets/`), GitHub-Workflow (`.github/workflows/release.yml`),
+dazu `README.md`, `LICENSE` (MIT), `ANLEITUNG-GITHUB.md` (Hochladen, Release, Fehlerhilfe) und dieses Protokoll.
 
-Teile zusammensetzen und prüfen (Terminal auf dem Mac):
+Ältere Lieferdateien im Ordner (`Haushaltsbuch-Repo.zip`, `Haushaltsbuch-Quellcode.zip`, Update 1.4.1) sind
+überholt und per `.gitignore` vom Repo ausgeschlossen; sie können gelöscht werden. Die großen 1.4.0-Installer
+liegen weiter in `Desktop/Haushaltsbuch`; künftig kommen alle Installer vom GitHub-Release.
 
-    cd ~/Desktop/Haushaltsbuch
-    cat Haushaltsbuch-Setup-1.4.0.exe.part* > Haushaltsbuch-Setup-1.4.0.exe
-    cat Haushaltsbuch-Mac-1.4.0.zip.part*   > Haushaltsbuch-Mac-1.4.0.zip
-    shasum -a 256 -c SHA256SUMS-1.4.0.txt
-
-Dateien der Versionen 1.0.0 bis 1.3.0 im Ordner können gelöscht werden.
-
-## 3. Installation
-- **Windows:** Setup.exe doppelklicken, UAC bestätigen. Bei SmartScreen „Weitere Informationen“, „Trotzdem ausführen“ (App ist nicht signiert). Installiert nach `C:\Programme\Haushaltsbuch`, mit Desktop-Symbol und Startmenü-Eintrag. Update installiert sich über die vorhandene Version, Deinstallation über Einstellungen, Apps.
-- **Mac:** zip entpacken, `Haushaltsbuch.app` nach Programme, einmalig im Terminal:
-
-      codesign --force --deep --sign - /Applications/Haushaltsbuch.app
-      xattr -cr /Applications/Haushaltsbuch.app
-
-## 4. Funktionen (Stand 1.4.1)
+## 3. Funktionen (Stand 1.4.2)
 - Übersicht pro Monat und Jahr: Übertrag, Einnahmen, Ausgaben, Saldo; Ausgaben nach Kategorie; Jahresdiagramm.
-- Buchungen anlegen, ändern, löschen, filtern.
-- Übertrag des Saldos in den Folgemonat und das Folgejahr, optionaler Anfangsbestand (Einstellungen).
-- Daueraufträge (monatlich, vierteljährlich, jährlich); fällige Buchungen werden beim Start und beim Zurückkehren in die App als normale Buchungen angelegt.
-- Monatsbudget pro Ausgaben-Kategorie (Kategorien). In der Jahresansicht gilt das Zwölffache.
-- Kontoauszug-Import aus CSV (Buchungen, „Kontoauszug importieren …“) mit Spaltenerkennung, Vorschau, Duplikaterkennung, Kategorie-Lernen aus früheren Buchungen.
-- Sicherung und Wiederherstellung als Datei (Einstellungen), mit Prüfung und automatischer Sicherheitskopie vor dem Wiederherstellen.
-- CSV-Export für Excel.
-- Versionsanzeige unter Einstellungen (ab 1.4.1).
+- Buchungen anlegen, ändern, löschen, filtern; Übertrag in den Folgemonat, optionaler Anfangsbestand.
+- Daueraufträge (monatlich, vierteljährlich, jährlich).
+- Monatsbudget pro Ausgaben-Kategorie (Jahresansicht: Zwölffaches).
+- Kontoauszug-Import (CSV) mit Spaltenerkennung, Vorschau, Duplikaterkennung, Kategorie-Lernen.
+- Sicherung/Wiederherstellung mit Prüfung und Sicherheitskopie; CSV-Export.
+- **Neu: Update-Funktion** (Einstellungen › Updates, Hinweis in der Seitenleiste), siehe Abschnitt 6.
+- **Neu: Linux-Version** als AppImage.
 
-## 5. Daten
-- Windows: `%APPDATA%\Haushaltsbuch\haushaltsbuch.json`
-- Mac: `~/Library/Application Support/Haushaltsbuch/haushaltsbuch.json`
-- Bei jedem Speichern wird die vorherige Datei als `haushaltsbuch.bak.json` behalten; geschrieben wird atomar (temporäre Datei, dann Umbenennen).
-- Format: Beträge in ganzen Cent, Datum als `YYYY-MM-DD`. Felder: `categories` (name, type, optional `budget`), `transactions`, `recurring`, `opening`.
-- Beim Update bleiben die Daten erhalten.
+## 4. Daten
+- Windows `%APPDATA%\Haushaltsbuch`, Mac `~/Library/Application Support/Haushaltsbuch`, Linux `~/.config/Haushaltsbuch`.
+- `haushaltsbuch.json` (Beträge in Cent, Datum `YYYY-MM-DD`), dazu `.bak.json` vom letzten Speichern.
+- `update.json`: Einstellung „automatisch suchen“, Zeitpunkt und Ergebnis der letzten Prüfung.
+- Updates verändern die Daten nie.
 
-## 6. Technik und Build (für Weiterentwicklung)
-- Electron 33.2.0, `contextIsolation`, `sandbox`, strikte CSP (`default-src 'self'`). Dateien: `main.js`, `preload.js`, `index.html`, `app.css`, `app.js`, `validate.js`, `importer.js`.
-- Entwickelt in einer Linux-Cloud-Umgebung. Dort stehen weder Wine noch .NET zur Verfügung, daher:
-  - Mac-App: `@electron/packager` (darwin, arm64), Icon als `icon.icns` (aus dem 512-px-PNG).
-  - Windows: `electron-builder --win dir --x64` (nur entpackte App), Exe per `resedit` mit Icon und Versionsinfo versehen, Installer mit eigenem NSIS-Skript `installer/haushaltsbuch.nsi` (makensis, Deutsch, Installation für alle Benutzer).
-  - Versionsnummer muss an drei Stellen angehoben werden: `package.json`, `installer/haushaltsbuch.nsi` (zweimal), `patch-exe.js`.
-- Auf einem Windows-PC mit Node genügt zum Testen `npm install` und `npm start`; ein Installer lässt sich dort auch mit `electron-builder --win nsis` bauen.
+## 5. Bauen (GitHub Actions)
+Workflow `.github/workflows/release.yml`, startet beim Veröffentlichen eines Releases (Tag `v<Version>`)
+oder von Hand. Ablauf:
+1. **Ubuntu:** Version prüfen (Tag = `package.json`), `npm ci`, alle Tests, dann
+   `tools/build-release.sh win` (electron-builder `--win dir`, Exe-Icon/Version per `resedit`, eigenes
+   NSIS-Setup, kleines Update für Windows und Mac, `app.asar`) und `tools/build-release.sh linux` (AppImage).
+2. **macOS:** `tools/build-release.sh mac`: `@electron/packager` mit genau derselben `app.asar`,
+   ad-hoc-Signatur (`codesign --sign -`) und Prüfung, Zip per `ditto`.
+3. **Veröffentlichen:** `SHA256SUMS.txt` erzeugen, alle Dateien per `gh release upload` ans Release.
 
-## 7. Updates ohne neues Setup (ab 1.4.1)
-Die große Setup-Datei (77 MB) besteht fast nur aus der Electron-Laufzeit. Der eigene Programmcode steckt in einer einzigen Datei, `resources/app.asar` (ca. 100 KB). Ein Update tauscht nur diese Datei aus.
-- **Voraussetzung:** Die Prüfsummen-Sperre von Electron (Fuse `EnableEmbeddedAsarIntegrityValidation`) ist in der Windows-Exe und der Mac-App aus; geprüft am 21.10.2026.
-- **Windows:** `Haushaltsbuch-Update-<v>.exe` (NSIS, `installer/update.nsi`). Findet die Installation über den Registry-Eintrag (`InstallLocation`), passt nur auf dieselbe Serie (z. B. 1.4.x), verweigert ältere Versionen, wartet, solange das Programm läuft, tauscht `app.asar` über Umbenennen aus (bei Fehler wird die alte Datei zurückgeholt) und setzt die Versionsnummer unter „Apps“. Ohne Fenster: Schalter `/S`.
-- **Mac:** `Haushaltsbuch-Update-<v>-Mac.sh` (Vorlage `installer/update-mac.sh.in`) mit eingebetteter, per SHA-256 geprüfter `app.asar`. Gleiche Prüfungen, aktualisiert `Info.plist` (Version und Asar-Hash), signiert ad hoc neu, entfernt Quarantäne; bei Fehler Rückkehr zur alten Version.
-- **Nächstes Update bauen:** Version in `package.json` anheben (Major.Minor gleich lassen, z. B. 1.4.2), `npx electron-builder --win dir --x64`, dann `MAKENSIS=<makensis> node tools/make-update.js release/win-unpacked/resources/app.asar <ausgabe>`. Ein Update enthält immer den kompletten Programmcode, d. h. 1.4.3 lässt sich auch direkt auf 1.4.0 einspielen.
-- **Grenze:** Ändert sich die Electron-Version (Sicherheitsupdates, neue Funktionen der Laufzeit), braucht es wieder ein vollständiges Setup mit neuer Minor-Version (z. B. 1.5.0). Kleine Updates passen dann auf 1.5.x.
+Versionsregel: letzte Stelle für normale Änderungen (kleines Update möglich), mittlere Stelle nur bei
+neuer Electron-Version (dann vollständiges Setup nötig). Electron ist 33.2.0.
 
-## 8. Tests
-Automatische jsdom-Tests (Bedienabläufe mit nachgebildeter Electron-Schnittstelle): `smoke` (Grundablauf), `smoke2` (Übertrag), `smoke3` (Daueraufträge), `smoke4` (Sicherung), `smoke5` (Budget und Import), `imp1` (CSV-Importer: Beträge, Datumsformate, Kodierungen, Sparkasse/ING/DKB-ähnliche Layouts). Alle liefen zuletzt fehlerfrei.
+## 6. Updates
+- **Prüfung:** `https://api.github.com/repos/MartinRie/Haushaltsbuch/releases/latest`, automatisch höchstens
+  einmal am Tag (abschaltbar) oder per Knopf. Ohne Internet passiert nichts.
+- **Sicherheit:** Es werden nur Dateien von `github.com/MartinRie/Haushaltsbuch/releases/download/` geladen, jede
+  wird gegen `SHA256SUMS.txt` desselben Releases geprüft. Die Daten aus der Oberfläche bestimmen nie die
+  Download-Adresse. Grenze: Wer das GitHub-Konto übernimmt, könnte auch Prüfsummen fälschen; eine echte
+  Signatur gibt es (wie beim ganzen Programm) nicht.
+- **Windows:** gleiche Serie lädt `Haushaltsbuch-Update-<v>.exe` (ca. 180 KB), neue Serie das Setup.
+  Start mit Windows-Rückfrage, die App beendet sich. Das Update-Programm prüft Installation und Version,
+  wartet bei laufender App und rollt bei Fehlern zurück.
+- **Mac:** gleiche Serie lädt `Haushaltsbuch-<v>.asar` und tauscht sie in der App aus (Info.plist,
+  ad-hoc-Signatur, Neustart; bei Fehler Rückkehr zur alten Datei). Neue Serie oder schreibgeschützte App:
+  Download-Seite öffnet sich.
+- **Linux:** lädt die neue AppImage-Datei, ersetzt die laufende und startet neu.
+- Manuelle kleine Updates: `Haushaltsbuch-Update-<v>.exe` und `Haushaltsbuch-Update-<v>-Mac.sh`
+  (Terminal) am Release.
 
-Zusätzlich am 21.10.2026:
-- Das echte Setup 1.4.0 unter Wine (Windows-Emulation auf Linux) installiert: Programmordner und Registry-Eintrag wie vorgesehen.
-- Update 1.4.1 unter Wine darüber eingespielt; außerdem die Fälle gleiche Version, neuere Version, falsche Serie, keine Installation und „Programm läuft“ (Update bricht ab, alte Version bleibt).
-- Mac-Update-Skript in einer nachgebauten App-Struktur getestet (mit Ersatz für PlistBuddy/codesign): normales Update, alle Abbruchfälle, beschädigte Datei, fehlende Schreibrechte, Zurückrollen bei Fehler.
-- Programmcode 1.4.1 in echtem Electron 33.2.0 (Linux) gestartet: lädt Daten, zeigt „Haushaltsbuch 1.4.1“.
+## 7. Tests (Stand 22.10.2026)
+- `npm test`: Bedienabläufe (jsdom) für Übersicht, Übertrag, Daueraufträge, Sicherung, Budget, Import,
+  Update-Feld; CSV-Importer; `updater.js` (Versionen, Dateiauswahl je System, fremde Adressen,
+  Prüfsummen, Asar-Header-Hash gegen `@electron/asar`, Mac-Austausch mit Rückfall, AppImage-Austausch).
+- Gesamtablauf in echtem Electron 33.2.0 (Linux): Start, Hinweis „Update 1.4.3“, Download, Prüfung,
+  Austausch der AppImage-Datei, Neustart der neuen Datei. GitHub dabei nachgestellt.
+- GitHub-Lauf in frischer Kopie nachgestellt (`npm ci`, Tests, alle drei Builds): grün.
+- Unter Wine: Setup 1.4.0 installiert, Update 1.4.2 darüber, Setup 1.4.2 darüber, Deinstallation; alle
+  Abbruchfälle des Update-Programms.
+- AppImage 1.4.2 gestartet, Oberfläche lädt. Mac-Update-Skript in nachgebauter App-Struktur.
 
-## 9. Bekannte Einschränkungen und offene Punkte
-1. **Nicht auf echten Systemen getestet.** Windows nur unter Wine (Installation und Update, nicht die laufende App), Mac nur nachgebildet.
-2. **CSV-Import ohne echte Bankdatei entwickelt.** Typische Formate werden erkannt, bei einer abweichenden Bank kann die Zuordnung von Hand nötig sein oder die Erkennung angepasst werden. Hilfreich: ein anonymisierter Auszug mit wenigen Zeilen.
-3. **Doppelbuchung möglich**, wenn ein Posten sowohl als Dauerauftrag als auch im importierten Kontoauszug steht; im Import dann abwählen.
-4. **Nicht signiert:** SmartScreen-Hinweis unter Windows, `codesign`/`xattr` auf dem Mac nötig. Signieren erfordert ein Entwicklerzertifikat.
-5. **Mac nur Apple Silicon (arm64)**, keine Intel-Version. Keine automatische Update-Funktion; neue Versionen werden von Hand installiert.
-6. **GitHub:** In der Arbeitsumgebung war kein GitHub-Zugang aktiv. Das Repo liegt als `Haushaltsbuch-Repo.zip` bereit und muss von dir hochgeladen werden (Befehle in der README bzw. unten).
-7. **Kosmetisch, ungeklärt:** Unter Wine stand im Registry-Eintrag als Größe 0 („EstimatedSize“). Ob das auf echtem Windows auch so ist, ist ungeprüft; bei Bedarf beim nächsten vollständigen Setup ansehen.
-8. **Update-Dateien sind ebenfalls nicht signiert** (gleiche SmartScreen-Meldung wie beim Setup).
-9. **Idee für später:** dunkles Design.
-
-## 10. Repo auf GitHub anlegen
-Auf github.com ein leeres Repo `haushaltsbuch` anlegen (ohne README), dann:
-
-    cd ~/Desktop/Haushaltsbuch
-    unzip Haushaltsbuch-Repo.zip && cd repo
-    git remote add origin https://github.com/<dein-name>/haushaltsbuch.git
-    git branch -M main
-    git push -u origin main
-
-Die Installer gehören nicht ins Repo, sondern bei GitHub als „Release“ angehängt.
+## 8. Bekannte Einschränkungen und offene Punkte
+1. **Nicht auf deinen echten Rechnern getestet.** Windows nur unter Wine, Mac nur nachgebildet (der Mac-Teil
+   des Workflows läuft zum ersten Mal auf GitHub), Linux in einer Cloud-Umgebung.
+2. **Der echte GitHub-Lauf** ist noch nicht gelaufen. Erfahrungsgemäß braucht der erste Lauf ein, zwei
+   Nachbesserungen.
+3. **Nicht signiert** (SmartScreen, Mac-Quarantäne beim ersten Herunterladen).
+4. **Electron 33** wird nicht mehr mit Sicherheitsupdates versorgt. Sinnvoll wäre irgendwann 1.5.0 mit
+   aktueller Electron-Version (einmal vollständiges Setup bzw. neue Mac-App).
+5. Mac nur Apple Silicon, Linux nur x86_64.
+6. Kontoauszug-Import ohne echte Bankdatei entwickelt; Doppelbuchung möglich, wenn ein Posten als
+   Dauerauftrag und im Import steht.
+7. Idee für später: dunkles Design.

@@ -1,0 +1,109 @@
+# Baut das Haushaltsbuch für Windows, Mac und Linux und hängt die Dateien an das GitHub-Release.
+# Start: automatisch beim Veröffentlichen eines Releases (Tag z. B. v1.4.2),
+#        oder von Hand unter Actions › "Release bauen" › Run workflow (dann nur als Artefakte zum Herunterladen).
+name: Release bauen
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+jobs:
+  windows-linux:
+    name: Tests, Windows und Linux
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Version prüfen
+        if: github.event_name == 'release'
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if [ "${{ github.event.release.tag_name }}" != "v$V" ]; then
+            echo "::error::Der Release-Tag ist ${{ github.event.release.tag_name }}, in package.json steht aber $V. Bitte package.json anpassen oder den Tag v$V verwenden."
+            exit 1
+          fi
+
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: NSIS installieren
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq nsis
+
+      - name: Windows bauen (Setup und kleines Update)
+        run: bash tools/build-release.sh win
+
+      - name: Linux bauen (AppImage)
+        run: bash tools/build-release.sh linux
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: haushaltsbuch-windows-linux
+          path: out/*
+          if-no-files-found: error
+
+  mac:
+    name: Mac
+    needs: windows-linux
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Programmdatei aus dem Windows/Linux-Lauf holen
+        uses: actions/download-artifact@v5
+        with:
+          name: haushaltsbuch-windows-linux
+          path: out
+
+      - name: Mac bauen
+        run: bash tools/build-release.sh mac
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: haushaltsbuch-mac
+          path: out/Haushaltsbuch-Mac-*.zip
+          if-no-files-found: error
+
+  veroeffentlichen:
+    name: An das Release hängen
+    needs: [windows-linux, mac]
+    if: github.event_name == 'release'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: haushaltsbuch-*
+          merge-multiple: true
+          path: out
+
+      - name: Prüfsummen
+        working-directory: out
+        run: |
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Hochladen
+        working-directory: out
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" * --clobber --repo "${{ github.repository }}"

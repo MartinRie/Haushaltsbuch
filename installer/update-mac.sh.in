@@ -1,0 +1,90 @@
+#!/bin/bash
+# Haushaltsbuch-Update @VERSION@ für den Mac.
+# Ersetzt nur den Programmcode (app.asar) in der installierten App. Deine Buchungen bleiben unverändert.
+# Aufruf im Terminal:  bash Haushaltsbuch-Update-@VERSION@-Mac.sh   [Pfad zur App, Standard /Applications/Haushaltsbuch.app]
+set -euo pipefail
+
+VERSION="@VERSION@"
+SERIES="@SERIES@"
+ASAR_SHA256="@ASAR_SHA256@"
+HEADER_SHA256="@HEADER_SHA256@"
+APP="${1:-/Applications/Haushaltsbuch.app}"
+RES="$APP/Contents/Resources"
+PLIST="$APP/Contents/Info.plist"
+PB="${PLISTBUDDY:-/usr/libexec/PlistBuddy}"
+
+say()  { printf '%s\n' "$*"; }
+fail() { printf '\nFEHLER: %s\n' "$*" >&2; exit 1; }
+
+# a < b ?  (Versionen wie 1.4.10)
+ver_lt() {
+  local IFS=.; local -a a=($1) b=($2); local i
+  for i in 0 1 2; do
+    local x=${a[i]:-0} y=${b[i]:-0}
+    (( 10#$x < 10#$y )) && return 0
+    (( 10#$x > 10#$y )) && return 1
+  done
+  return 1
+}
+
+say "Haushaltsbuch-Update $VERSION"
+say "--------------------------------"
+
+[ -d "$APP" ] && [ -f "$RES/app.asar" ] && [ -f "$PLIST" ] || fail "Keine Haushaltsbuch-App gefunden unter: $APP
+Liegt sie woanders, den Pfad angeben:  bash $0 /Pfad/zu/Haushaltsbuch.app"
+
+CURRENT=$("$PB" -c "Print :CFBundleShortVersionString" "$PLIST" 2>/dev/null || echo "?")
+say "Installiert: $CURRENT"
+
+case "$CURRENT" in
+  "$SERIES".*) ;;
+  *) fail "Dieses Update ist für Version $SERIES.x gedacht. Bitte die vollständige App verwenden." ;;
+esac
+if ver_lt "$VERSION" "$CURRENT"; then
+  fail "Installiert ist bereits die neuere Version $CURRENT."
+fi
+if [ "$CURRENT" = "$VERSION" ]; then
+  read -r -p "Version $VERSION ist bereits installiert. Trotzdem erneut einspielen? (j/n) " a
+  [ "$a" = "j" ] || [ "$a" = "J" ] || exit 0
+fi
+
+while pgrep -f "$APP/Contents/MacOS/" >/dev/null 2>&1; do
+  read -r -p "Das Haushaltsbuch ist noch geöffnet. Bitte beenden (Cmd+Q) und Enter drücken ... " _
+done
+
+[ -w "$RES" ] && [ -w "$PLIST" ] || fail "Keine Schreibrechte für die App. Bitte so aufrufen:  sudo bash $0 \"$APP\""
+
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+
+# Eingebetteten Programmcode auspacken und prüfen
+sed -n '/^__PAYLOAD_BELOW__$/,$p' "$0" | tail -n +2 | base64 --decode > "$TMP/app.asar"
+GOT=$(shasum -a 256 "$TMP/app.asar" | cut -d' ' -f1)
+[ "$GOT" = "$ASAR_SHA256" ] || fail "Die Update-Datei ist beschädigt (Prüfsumme stimmt nicht). Nichts wurde verändert."
+
+# Sicherung für den Fehlerfall
+cp -p "$RES/app.asar" "$TMP/app.asar.old"
+cp -p "$PLIST" "$TMP/Info.plist.old"
+restore() {
+  cp -p "$TMP/app.asar.old" "$RES/app.asar"
+  cp -p "$TMP/Info.plist.old" "$PLIST"
+  codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+}
+trap 'printf "\nFehler, die bisherige Version wird wiederhergestellt ...\n" >&2; restore; rm -rf "$TMP"' ERR
+
+cp "$TMP/app.asar" "$RES/app.asar.new"
+mv -f "$RES/app.asar.new" "$RES/app.asar"
+"$PB" -c "Set :CFBundleShortVersionString $VERSION" "$PLIST"
+"$PB" -c "Set :CFBundleVersion $VERSION" "$PLIST"
+"$PB" -c "Set :ElectronAsarIntegrity:Resources/app.asar:hash $HEADER_SHA256" "$PLIST" 2>/dev/null || true
+
+say "Signiere die App neu (ad hoc) ..."
+codesign --force --deep --sign - "$APP" >/dev/null
+xattr -cr "$APP"
+
+trap 'rm -rf "$TMP"' ERR
+say ""
+say "Fertig. Haushaltsbuch ist jetzt auf Version $VERSION."
+exit 0
+
+__PAYLOAD_BELOW__

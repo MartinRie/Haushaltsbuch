@@ -1,0 +1,63 @@
+{
+  "name": "haushaltsbuch",
+  "productName": "Haushaltsbuch",
+  "version": "1.4.2",
+  "description": "Einfaches Haushaltsbuch fuer Windows, Mac und Linux",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests/imp1.js && node tests/smoke.js && node tests/smoke2.js && node tests/smoke3.js && node tests/smoke4.js && node tests/smoke5.js && node tests/smoke6.js && node tests/updater.test.js"
+  },
+  "devDependencies": {
+    "@electron/asar": "3.4.1",
+    "@electron/packager": "18.4.4",
+    "electron": "33.2.0",
+    "electron-builder": "26.15.3",
+    "jsdom": "29.1.1",
+    "resedit": "1.7.2"
+  },
+  "author": "Martin Riedel",
+  "build": {
+    "appId": "de.haushaltsbuch.app",
+    "productName": "Haushaltsbuch",
+    "directories": {
+      "buildResources": "build",
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "app.css",
+      "app.js",
+      "validate.js",
+      "importer.js",
+      "updater.js",
+      "assets/**",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Office",
+      "icon": "build/icon-512.png",
+      "artifactName": "Haushaltsbuch-${version}-x86_64.AppImage",
+      "synopsis": "Einfaches Haushaltsbuch"
+    },
+    "publish": null
+  },
+  "homepage": "https://github.com/MartinRie/Haushaltsbuch",
+  "updateRepo": "MartinRie/Haushaltsbuch",
+  "license": "MIT"
+}
